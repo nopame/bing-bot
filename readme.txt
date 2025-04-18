@@ -6,7 +6,14 @@ scraper-bing/
 │── go.mod         # ไฟล์ Go Modules สำหรับจัดการ dependencies
 
 --------------------
-# build app
+#build app for window
+go build -o bing-bot.exe
+--------------------
+#Startup Folder
+กด Win + R แล้วพิมพ์:
+shell:startup
+--------------------
+# linux
 go build -o search_bing && chmod +x /var/www/app/go/bing/search_bing && chcon -t bin_t /var/www/app/go/bing/search_bing && restorecon -v /var/www/app/go/bing/search_bing && systemctl daemon-reload && systemctl restart bing
 --------------------
 # Docker
