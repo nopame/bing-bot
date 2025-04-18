@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -24,12 +25,26 @@ func init() {
 
 	API_URL = getEnv("API_URL", "")
 	AUTH_TOKEN = getEnv("AUTH_TOKEN", "")
+	OpenBrowser = getEnvBool("OPEN_BROWSER", false)
 }
 
-// getEnv คืนค่าจาก os.Getenv ถ้าไม่มีให้คืนค่าดีฟอลต์
+// คืนค่า string จาก ENV
 func getEnv(key, fallback string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
 	}
 	return fallback
+}
+
+// คืนค่า bool จาก ENV เช่น "true", "1" = true
+func getEnvBool(key string, fallback bool) bool {
+	val := os.Getenv(key)
+	if val == "" {
+		return fallback
+	}
+	b, err := strconv.ParseBool(val)
+	if err != nil {
+		return fallback
+	}
+	return b
 }
