@@ -26,9 +26,10 @@ func init() {
 	API_URL = getEnv("API_URL", "")
 	AUTH_TOKEN = getEnv("AUTH_TOKEN", "")
 	OpenBrowser = getEnvBool("OPEN_BROWSER", false)
+	MaxConcurrentJobs = getEnvInt("MAX_CONCURRENT_JOBS", 4)
 }
 
-// คืนค่า string จาก ENV
+// คืนค่า string
 func getEnv(key, fallback string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
@@ -36,7 +37,7 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-// คืนค่า bool จาก ENV เช่น "true", "1" = true
+// คืนค่า bool เช่น "true", "1" = true
 func getEnvBool(key string, fallback bool) bool {
 	val := os.Getenv(key)
 	if val == "" {
@@ -47,4 +48,17 @@ func getEnvBool(key string, fallback bool) bool {
 		return fallback
 	}
 	return b
+}
+
+// คืนค่า int เช่น "4" = 4
+func getEnvInt(key string, fallback int) int {
+	val := os.Getenv(key)
+	if val == "" {
+		return fallback
+	}
+	i, err := strconv.Atoi(val)
+	if err != nil {
+		return fallback
+	}
+	return i
 }
