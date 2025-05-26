@@ -17,6 +17,4 @@ shell:startup
 go build -o search_bing && chmod +x /var/www/app/go/bing/search_bing && chcon -t bin_t /var/www/app/go/bing/search_bing && restorecon -v /var/www/app/go/bing/search_bing && systemctl daemon-reload && systemctl restart bing
 --------------------
 # Docker
-docker rm -f bing-bot-container 2>/dev/null || true && \
-docker build -t bing-bot-image . && \
-docker run -d --name bing-bot-container --restart always bing-bot-image
+docker rm -f bing-bot-container 2>/dev/null || true && docker build -t bing-bot-image . && docker run -d --name bing-bot-container --restart always bing-bot-image
