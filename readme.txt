@@ -13,14 +13,16 @@ go build -o bing-bot.exe
 กด Win + R แล้วพิมพ์:
 shell:startup
 --------------------
-Git
-git pull origin main
-
-# git commit
+# คำสั่ง git หากใช้ครั้งแรก
+git init
+git remote add origin https://github.com/nopame/bing-bot.git
+git branch -M main
 git add .
-git commit -m "Message Test"
-git push origin main
+git commit -m "First commit"
+git push -u origin main
 
+# git pull ดึงไฟล์
+git pull origin main
 --------------------
 # linux
 go build -o search_bing && chmod +x /var/www/app/go/bing/search_bing && chcon -t bin_t /var/www/app/go/bing/search_bing && restorecon -v /var/www/app/go/bing/search_bing && systemctl daemon-reload && systemctl restart bing
