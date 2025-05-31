@@ -11,7 +11,7 @@ import (
 var (
 	OpenBrowser       = false
 	ResourceBlockLog  = false
-	QueueSize         = 8
+	QueueSize         = 12
 	MaxConcurrentJobs = 4
 	API_URL           string
 	API_PREFIX        string
