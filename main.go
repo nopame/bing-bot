@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 	"sync"
 	"time"
 
@@ -14,11 +13,6 @@ import (
 )
 
 func main() {
-	// ✅ ตั้งค่า ENV ให้ playwright-go ใช้งาน browser และ skip download
-	os.Setenv("PLAYWRIGHT_BROWSERS_PATH", "/ms-playwright")
-	os.Setenv("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")
-	os.Setenv("HOME", "/root") // สำคัญสำหรับ playwright-go บน container
-
 	utils.PrintDivider()
 	fmt.Printf("\U0001F680 Starting Bing Scraper | Max Workers: %d | Queue Size: %d\n", config.MaxConcurrentJobs, config.QueueSize)
 
