@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	// ✅ บังคับ playwright-go ใช้ browser path ที่อยู่ใน base image
+	// ✅ บังคับ playwright-go ใช้ browser path ที่ถูกต้องใน container
 	os.Setenv("PLAYWRIGHT_BROWSERS_PATH", "/ms-playwright")
 	os.Setenv("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")
 

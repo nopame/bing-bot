@@ -1,4 +1,3 @@
-# ✅ ใช้ base image ของ Microsoft Playwright ที่มี Chromium/Firefox/WebKit ติดตั้งไว้แล้ว
 FROM mcr.microsoft.com/playwright:v1.50.1-jammy
 
 # ✅ ติดตั้ง Go
@@ -9,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm /tmp/go.tar.gz \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# ✅ กำหนด ENV และ PATH
+# ✅ กำหนด PATH และ ENV
 ENV PATH="/usr/local/go/bin:/root/go/bin:$PATH"
 ENV HOME=/root
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
@@ -17,8 +16,8 @@ ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PWDEBUG=0
 ENV DISPLAY=
 
-# ✅ ติดตั้ง playwright-go-driver แล้ววางไว้ใน ~/.playwright-go/driver
-RUN go install github.com/playwright-community/playwright-go/cmd/playwright-go-driver@latest && \
+# ✅ ติดตั้ง playwright-go-driver เวอร์ชัน v0.171.1 (ยังมี driver อยู่)
+RUN go install github.com/playwright-community/playwright-go/cmd/playwright-go-driver@v0.171.1 && \
     mkdir -p /root/.playwright-go && \
     cp /root/go/bin/playwright-go-driver /root/.playwright-go/driver
 
