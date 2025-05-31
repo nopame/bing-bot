@@ -14,9 +14,10 @@ import (
 )
 
 func main() {
-	// ✅ บังคับ playwright-go ใช้ browser path ที่ถูกต้องใน container
+	// ✅ ตั้งค่า ENV ให้ playwright-go ใช้งาน browser และ skip download
 	os.Setenv("PLAYWRIGHT_BROWSERS_PATH", "/ms-playwright")
 	os.Setenv("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")
+	os.Setenv("HOME", "/root") // สำคัญสำหรับ playwright-go บน container
 
 	utils.PrintDivider()
 	fmt.Printf("\U0001F680 Starting Bing Scraper | Max Workers: %d | Queue Size: %d\n", config.MaxConcurrentJobs, config.QueueSize)
@@ -54,26 +55,29 @@ func main() {
 			defer wg.Done()
 			for {
 				select {
-				case job := <-queue:
+				case job := <-queue: // ✅ ดึงงานจาก Queue
 					fmt.Printf("✅ Worker %d received job: %s (ID: %d)\n", workerID, job.Query, job.ID)
-					<-workerPool
+					<-workerPool // ✅ รับสิทธิ์ทำงานจาก Worker Pool
 
 					fmt.Printf("🛠️ Worker %d processing: %s (ID: %d)\n", workerID, job.Query, job.ID)
 					if err := search.SearchBing(&job); err != nil {
 						log.Printf("❌ Worker %d failed: %v\n", workerID, err)
 					}
 
+					// ✅ เมื่องานเสร็จ ลบออกจาก ActiveJobs
 					activeJobs.Delete(job.ID)
+
+					// ✅ คืน Worker Slot กลับไป
 					workerPool <- struct{}{}
 
 				default:
-					time.Sleep(500 * time.Millisecond)
+					time.Sleep(500 * time.Millisecond) // ✅ รอรับงานใหม่ ไม่ใช้ CPU 100%
 				}
 			}
 		}(i)
 	}
 
-	// ✅ รอให้ทุก worker ทำงานเสร็จ
+	// ✅ รอให้ Worker ทำงานเสร็จ
 	wg.Wait()
 	fmt.Println("🎉 All tasks completed!")
 	utils.PrintDivider()
