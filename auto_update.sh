@@ -6,39 +6,40 @@ cd /var/docker/bing || exit 1
 
 echo "[AUTO-UPDATE] 🔄 Pulling latest code from Git..."
 
-# ✅ ตรวจสอบและแก้ permission ให้กับ .git
+# ✅ แก้ปัญหา 'dubious ownership'
+git config --global --add safe.directory "$(pwd)"
+
+# ✅ ตรวจสอบและแก้ permission ของ .git (ถ้าใช้ sudo หรือ root)
 if [ -d ".git" ]; then
-    echo "[AUTO-UPDATE] 🔍 Checking .git permissions..."
-    OWNER=$(stat -c "%U" .git)
-    if [ "$OWNER" != "$USER" ]; then
-        echo "[AUTO-UPDATE] 🛠 Fixing .git ownership to $USER..."
-        sudo chown -R "$USER":"$USER" .git
-    fi
+    echo "[AUTO-UPDATE] 🛠 Fixing permissions for .git..."
+    chown -R "$(id -u):$(id -g)" .git
 fi
 
-# ✅ อัปเดต Git repo
+# ✅ รีเซ็ตและดึงโค้ดจาก Git
 git reset --hard HEAD
 if ! git pull origin main; then
     echo "[AUTO-UPDATE] ❌ Git pull failed"
     exit 1
 fi
 
-# ✅ ตรวจว่า Dockerfile มีการเปลี่ยนแปลง
-if [ Dockerfile -nt .docker_image_timestamp ]; then
-    echo "[AUTO-UPDATE] 🛠️ Dockerfile changed. Will rebuild image."
-    rm -f .docker_image_timestamp
+# ✅ ตรวจสอบว่ามีการเปลี่ยน Dockerfile หรือไม่
+if [ -f .dockerfile_hash ] && cmp -s .dockerfile_hash Dockerfile; then
+    echo "[AUTO-UPDATE] ✅ Dockerfile unchanged. Skipping rebuild."
 else
-    echo "[AUTO-UPDATE] ✅ Dockerfile unchanged. Checking for existing image..."
+    echo "[AUTO-UPDATE] 🛠️ Dockerfile changed. Will rebuild image."
+    cp Dockerfile .dockerfile_hash
 fi
 
 # ✅ ตรวจสอบว่า image มีอยู่หรือไม่
-if ! docker image inspect bing-bot-image > /dev/null 2>&1 || [ ! -f .docker_image_timestamp ]; then
-    echo "[AUTO-UPDATE] 🔧 Building new image..."
-    docker build -t bing-bot-image .
-    touch .docker_image_timestamp
+if ! docker image inspect bing-bot-image > /dev/null 2>&1; then
+    echo "[AUTO-UPDATE] 📦 Image not found. Building new image..."
 else
     echo "[AUTO-UPDATE] ✅ Docker image already exists."
 fi
+
+# ✅ สร้าง image ใหม่ทุกครั้งหากมีการเปลี่ยน Dockerfile
+echo "[AUTO-UPDATE] 🔧 Building new image..."
+docker build -t bing-bot-image .
 
 # ✅ ลบ container เดิม (ถ้ามี)
 docker rm -f bing-bot-container 2>/dev/null || true
@@ -46,7 +47,7 @@ docker rm -f bing-bot-container 2>/dev/null || true
 # ✅ รัน container ใหม่
 docker run -d --name bing-bot-container --restart always bing-bot-image
 
-# ✅ เคลียร์ log
+# ✅ เคลียร์ log system อย่างปลอดภัย
 find /var/log/ -type f -exec truncate -s 0 {} \;
 
 echo "[AUTO-UPDATE] ✅ Done."
