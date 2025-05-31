@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	// ✅ กำหนด ENV ให้ playwright-go ใช้ browser ที่ติดตั้งไว้ใน container
+	// ✅ บังคับ playwright-go ใช้ browser path ที่อยู่ใน base image
 	os.Setenv("PLAYWRIGHT_BROWSERS_PATH", "/ms-playwright")
 	os.Setenv("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")
 
@@ -54,29 +54,26 @@ func main() {
 			defer wg.Done()
 			for {
 				select {
-				case job := <-queue: // ✅ ดึงงานจาก Queue
+				case job := <-queue:
 					fmt.Printf("✅ Worker %d received job: %s (ID: %d)\n", workerID, job.Query, job.ID)
-					<-workerPool // ✅ รับสิทธิ์ทำงานจาก Worker Pool
+					<-workerPool
 
 					fmt.Printf("🛠️ Worker %d processing: %s (ID: %d)\n", workerID, job.Query, job.ID)
 					if err := search.SearchBing(&job); err != nil {
 						log.Printf("❌ Worker %d failed: %v\n", workerID, err)
 					}
 
-					// ✅ เมื่องานเสร็จ ลบออกจาก ActiveJobs
 					activeJobs.Delete(job.ID)
-
-					// ✅ คืน Worker Slot กลับไป
 					workerPool <- struct{}{}
 
 				default:
-					time.Sleep(500 * time.Millisecond) // ✅ รอรับงานใหม่ ไม่ใช้ CPU 100%
+					time.Sleep(500 * time.Millisecond)
 				}
 			}
 		}(i)
 	}
 
-	// ✅ รอให้ Worker ทำงานเสร็จ
+	// ✅ รอให้ทุก worker ทำงานเสร็จ
 	wg.Wait()
 	fmt.Println("🎉 All tasks completed!")
 	utils.PrintDivider()
