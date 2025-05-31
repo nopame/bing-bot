@@ -1,0 +1,68 @@
+# 1. ติดตั้ง docker
+sudo dnf update -y
+sudo dnf install -y dnf-plugins-core
+
+- - - - - - - - - - - - - - -
+
+# 2. เพิ่ม Docker Repository
+sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+- - - - - - - - - - - - - - -
+
+# 3. ติดตั้ง Docker
+sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# 3.1. เช็คเวอร์ชัน
+docker --version
+docker compose version
+
+- - - - - - - - - - - - - - -
+
+# 4. เปิดใช้งานและเริ่มต้น Docker
+# 4.1 สั่ง start ให้ service docker ทำงาน
+sudo systemctl start docker
+
+# 4.2 ดู status docker
+systemctl status docker
+
+# 4.3 เปิด enable ให้ทำงานหลัง restart ทุกครั้ง
+sudo systemctl enable docker
+
+- - - - - - - - - - - - - - -
+
+# 5. ให้ user ปัจจุบันใช้ Docker ได้โดยไม่ต้องใช้ sudo
+sudo usermod -aG docker $USER
+newgrp docker
+
+- - - - - - - - - - - - - - -
+
+# 6. ทดสอบการติดตั้ง
+# 6.1 ดึง image จาก Docker จาก Docker Hub
+docker pull crccheck/hello-world
+
+# 6.2 เรียกดูรายการ image ในระบบ
+docker images
+
+# 6.3 Deploy web application.
+docker run -d --name web-test -p 80:8000 crccheck/hello-world
+
+# 6.4 ดู docker container ในระบบ
+docker ps
+
+- - - - - - - - - - - - - - -
+
+# 7 ทดสอบเรียกดู url ของ web application
+curl 127.0.0.1:80
+
+- - - - - - - - - - - - - - -
+
+# 8 ลบไฟล์ ชุด image ทดสอบ
+# 8.1 ลบ container
+
+# เรียกรายการ docker container
+docker ps
+docker rm xxxx
+
+# เรียกรายการ docker images
+docker images
+docker rmi xxx

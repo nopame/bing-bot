@@ -1,0 +1,72 @@
+# 1. ติดตั้ง Git (ถ้ายังไม่ได้ติดตั้ง)
+sudo dnf install -y git
+
+- - - - - - - - - - - - - - -
+
+# 2. สร้างโฟลเดอร์และเข้าไปยัง /var/docker
+sudo mkdir -p /var/docker
+sudo chown -R $USER:$USER /var/docker
+cd /var/docker
+
+- - - - - - - - - - - - - - -
+
+# 3. Clone โปรเจกต์จาก GitHub
+git clone https://github.com/nopame/bing-bot.git bing
+
+# คำสั่งดูรายการที่ clone มา
+ll
+- - - - - - - - - - - - - - -
+
+# 4. เข้าไปในโปรเจกต์
+cd bing
+
+# คำสั่งดู script ใน folder bing
+ll
+
+- - - - - - - - - - - - - - -
+
+# 5 สร้างไฟล์ .env
+vi .env
+
+# ใส่ค่า config ลงไป
+AUTH_TOKEN=f6c2fe1607dd24623982d630cbb2380a
+API_URL=https://app.jongstit.com
+API_PREFIX="/scrapy"
+OPEN_BROWSER=false
+MAX_CONCURRENT_JOBS=4AUTH_TOKEN=f6c2fe1607dd24623982d630cbb2380a
+API_URL=https://app.jongstit.com
+API_PREFIX="/scrapy"
+OPEN_BROWSER=false
+MAX_CONCURRENT_JOBS=10
+
+- - - - - - - - - - - - - - -
+
+# 6. build Docker image หรือรัน container
+docker rm -f bing-bot-container 2>/dev/null || true && docker build -t bing-bot-image . && docker run -d --name bing-bot-container --restart always bing-bot-image
+
+- - - - - - - - - - - - - - -
+
+# 7. ดูรายการ container
+docker images
+docker ps
+
+- - - - - - - - - - - - - - -
+
+# 8. ดู log ที่ application พ่อนออกมา
+docker logs bing-bot-container -n 30 -f
+
+- - - - - - - - - - - - - - -
+
+# 9. ติดตั้ง script auto update จาก github
+# เรียกดู crontab schedule
+crontab -l
+
+# เพิ่ม/แก้ไข การตั้งค่า crontab
+crontab -e
+
+# ใส่ข้อมูล
+1 0 * * * /sbin/shutdown -r
+10 */6 * * * /var/docker/bing/auto_update.sh
+
+# restart service crontab
+sudo systemctl restart crond
