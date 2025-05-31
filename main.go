@@ -5,6 +5,7 @@ import (
 	"log"
 	"sync"
 	"time"
+	"os"
 
 	"scraper-bing/config"
 	"scraper-bing/getkeyword"
@@ -15,7 +16,7 @@ import (
 func main() {
 	// ✅ Fix: บังคับ path
 	os.Setenv("PLAYWRIGHT_BROWSERS_PATH", "/ms-playwright")
-	
+
 	utils.PrintDivider()
 	fmt.Printf("\U0001F680 Starting Bing Scraper | Max Workers: %d | Queue Size: %d\n", config.MaxConcurrentJobs, config.QueueSize)
 
