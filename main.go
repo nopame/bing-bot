@@ -3,33 +3,18 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 	"sync"
 	"time"
 
-	"github.com/playwright-community/playwright-go"
 	"scraper-bing/config"
 	"scraper-bing/getkeyword"
 	"scraper-bing/search"
 	"scraper-bing/utils"
 )
 
-func ensurePlaywrightDriverInstalled() {
-	err := playwright.Install(&playwright.RunOptions{
-		Browsers: []string{"firefox"},
-	})
-	if err != nil {
-		log.Fatalf("❌ Failed to install Playwright driver: %v", err)
-	}
-	log.Println("✅ Playwright driver installed successfully.")
-}
-
 func main() {
 	utils.PrintDivider()
 	fmt.Printf("\U0001F680 Starting Bing Scraper | Max Workers: %d | Queue Size: %d\n", config.MaxConcurrentJobs, config.QueueSize)
-
-	// ✅ ตรวจสอบว่ามี Driver ของ Playwright แล้วหรือยัง
-	ensurePlaywrightDriverInstalled()
 
 	// ✅ เปิด Browser ถ้าถูกเปิดใช้งาน
 	err := search.InitBrowser()
@@ -64,25 +49,29 @@ func main() {
 			defer wg.Done()
 			for {
 				select {
-				case job := <-queue:
+				case job := <-queue: // ✅ ดึงงานจาก Queue
 					fmt.Printf("✅ Worker %d received job: %s (ID: %d)\n", workerID, job.Query, job.ID)
-					<-workerPool
+					<-workerPool // ✅ รับสิทธิ์ทำงานจาก Worker Pool
 
 					fmt.Printf("🛠️ Worker %d processing: %s (ID: %d)\n", workerID, job.Query, job.ID)
 					if err := search.SearchBing(&job); err != nil {
 						log.Printf("❌ Worker %d failed: %v\n", workerID, err)
 					}
 
+					// ✅ เมื่องานเสร็จ ลบออกจาก ActiveJobs
 					activeJobs.Delete(job.ID)
+
+					// ✅ คืน Worker Slot กลับไป
 					workerPool <- struct{}{}
 
 				default:
-					time.Sleep(500 * time.Millisecond)
+					time.Sleep(500 * time.Millisecond) // ✅ รอรับงานใหม่ ไม่ใช้ CPU 100%
 				}
 			}
 		}(i)
 	}
 
+	// ✅ รอให้ Worker ทำงานเสร็จ
 	wg.Wait()
 	fmt.Println("🎉 All tasks completed!")
 	utils.PrintDivider()
